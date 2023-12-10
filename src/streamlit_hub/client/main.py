@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     streamlit_script_path = os.path.join(os.path.dirname(streamlit_hub.client.__file__), "app.py")
-    sys.argv = ["streamlit", "run", streamlit_script_path]
+    sys.argv = ["streamlit", "run", streamlit_script_path, "--theme.base", "dark", "--theme.primaryColor", "orange"]
     runpy.run_module("streamlit", run_name="__main__")
 
 
