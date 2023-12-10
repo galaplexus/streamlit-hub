@@ -30,7 +30,7 @@ class Manager:
         logger.info(f"Starting {app}")
         port = int(app.desired_port) if app.desired_port is not None else self._find_next_port()
         if type(app) is LocalApp:
-            command = f"streamlit run {app.path} --server.port {port}"
+            command = f"python -m streamlit run {app.path} --server.port {port}"
         elif type(app) is RepoApp:
             if not app.local_path:
                 app.local_path = os.path.join(RepoAccess(app).repo_path, app.streamlit_entry_point_in_repo)
@@ -49,7 +49,7 @@ class Manager:
             return "An app with the same name was already added"
         if type(app) is RepoApp:
             access = RepoAccess(app)
-            app.local_path = os.path.join(access.get_repo_path(), app.streamlit_entry_point_in_repo)
+            app.local_path = os.path.join(access.repo_path, app.streamlit_entry_point_in_repo)
         self.registered_apps.append(app)
         self.app_access.persist_list(self.registered_apps)
 
@@ -95,7 +95,7 @@ class Manager:
             access.pull()
 
     def _find_next_port(self) -> int:
-        for potential in range(8502, 8550):
+        for potential in range(8503, 8550):
             if potential in self.occupied_ports:
                 continue
             if any(map(lambda x: x.desired_port == potential, self.registered_apps)):

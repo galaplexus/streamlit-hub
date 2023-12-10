@@ -5,11 +5,7 @@ from streamlit_hub.models.App import LocalApp, RepoApp
 
 
 def show_status(manager: Manager):
-    (
-        col1,
-        col2,
-        col3,
-    ) = st.columns([0.2, 1, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     col1.write("**App Name**")
     col2.write("**App Details**")
     col3.write("**Actions**")

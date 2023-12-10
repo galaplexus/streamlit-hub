@@ -20,7 +20,8 @@ class RepoAccess:
 
     @staticmethod
     def clone_repo(url, destination):
-        if not os.path.exists(destination):
+        if not RepoAccess._is_git_initialized(destination):
+            os.makedirs(destination)
             # Clone the repository if it doesn't exist
             subprocess.run(["git", "clone", url, destination])
 
@@ -33,3 +34,7 @@ class RepoAccess:
             self.checkout_branch(branch)
         os.chdir(self.repo_path)
         subprocess.run(["git", "pull"])
+
+    @staticmethod
+    def _is_git_initialized(directory):
+        return os.path.exists(os.path.join(directory, ".git"))
