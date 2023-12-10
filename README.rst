@@ -1,49 +1,61 @@
-.. These are examples of badges you might want to add to your README:
-   please update the URLs accordingly
+Streamlit App Hub
+=================
 
-    .. image:: https://api.cirrus-ci.com/github/<USER>/streamlit-hub.svg?branch=main
-        :alt: Built Status
-        :target: https://cirrus-ci.com/github/<USER>/streamlit-hub
-    .. image:: https://readthedocs.org/projects/streamlit-hub/badge/?version=latest
-        :alt: ReadTheDocs
-        :target: https://streamlit-hub.readthedocs.io/en/stable/
-    .. image:: https://img.shields.io/coveralls/github/<USER>/streamlit-hub/main.svg
-        :alt: Coveralls
-        :target: https://coveralls.io/r/<USER>/streamlit-hub
-    .. image:: https://img.shields.io/pypi/v/streamlit-hub.svg
-        :alt: PyPI-Server
-        :target: https://pypi.org/project/streamlit-hub/
-    .. image:: https://img.shields.io/conda/vn/conda-forge/streamlit-hub.svg
-        :alt: Conda-Forge
-        :target: https://anaconda.org/conda-forge/streamlit-hub
-    .. image:: https://pepy.tech/badge/streamlit-hub/month
-        :alt: Monthly Downloads
-        :target: https://pepy.tech/project/streamlit-hub
-    .. image:: https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter
-        :alt: Twitter
-        :target: https://twitter.com/streamlit-hub
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: LICENSE
 
-.. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
-    :alt: Project generated with PyScaffold
-    :target: https://pyscaffold.org/
+Overview
+--------
 
-|
+Streamlit App Hub is a Python application that allows you to manage multiple Streamlit apps from a central hub. It provides an interactive web interface where you can add new Streamlit apps, start them, and gracefully exit the application.
 
-=============
-streamlit-hub
-=============
+Features
+--------
 
+- **Manage Multiple Streamlit Apps:** Easily start, stop, and add new Streamlit apps.
+- **Interactive Web Interface:** User-friendly interface for app management.
+- **Logging:** Configurable logging with colored console output and a log file.
 
-    Add a short description here!
+Getting Started
+---------------
 
+1. Clone the repository:
 
-A longer description of your project goes here...
+   ```bash
+   git clone https://github.com/your-username/streamlit-app-hub.git
+   cd streamlit-app-hub
+   ```
 
+2. Install the required dependencies:
 
-.. _pyscaffold-notes:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Note
-====
+3. Run the Streamlit App Hub:
 
-This project has been set up using PyScaffold 4.4. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
+   ```bash
+   streamlit run streamlit_manager.py
+   ```
+
+4. Access the web interface at `http://localhost:8501` in your browser.
+
+Configuration
+-------------
+
+- Streamlit apps are configured in the `streamlit_apps.json` file. Add new app information to this file.
+
+Logging
+-------
+
+- Logs are available both in the console with colored output and in the `app.log` file.
+
+Contributing
+------------
+
+Contributions are welcome! Please read `CONTRIBUTING.rst` for details on how to contribute to this project.
+
+License
+-------
+
+This project is licensed under the MIT License - see the `LICENSE` file for details.
