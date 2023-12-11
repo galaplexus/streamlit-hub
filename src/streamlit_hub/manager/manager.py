@@ -22,7 +22,10 @@ class Manager:
         self.registered_apps = self.app_access.get_list()
         for app in self.registered_apps:
             if app.run_by_default:
-                self.start_app(app)
+                try:
+                    self.start_app(app)
+                except:
+                    logger.error(f"couldnt start {app.name} at startup")
         check_thread = threading.Thread(target=self._clean_closed_processes, args=(), daemon=True)
         check_thread.start()
 
@@ -30,16 +33,17 @@ class Manager:
         logger.info(f"Starting {app}")
         port = int(app.desired_port) if app.desired_port is not None else self._find_next_port()
         if type(app) is LocalApp:
-            command = f"python -m streamlit run {app.path} --server.port {port}"
+            path = app.path
         elif type(app) is RepoApp:
             if not app.local_path:
                 app.local_path = os.path.join(RepoAccess(app).repo_path, app.streamlit_entry_point_in_repo)
-
-            command = f"streamlit run {app.local_path} --server.port {port}"
+            path = app.local_path
         else:
             logger.error("We can't process other type of app than local apps at the moment")
             return None
-        process = subprocess.Popen(command, start_new_session=True)
+        process = subprocess.Popen(
+            ["python", "-m", "streamlit", "run", path, "--server.port", str(port)], start_new_session=True
+        )
         self.occupied_ports.add(port)
         app.running_process = LocalProcess("", port, process)
         return process
