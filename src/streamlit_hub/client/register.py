@@ -1,5 +1,5 @@
 import streamlit as st
-
+import re
 from streamlit_hub.manager.manager import Manager
 from streamlit_hub.models.App import LocalApp, RepoApp
 
@@ -22,6 +22,9 @@ def repo_source(manager: Manager, app_name: str, run_by_default: bool):
     repo_url = st.text_input("Repo URL:")
     repo_branch = st.text_input("Repo Branch:")
     path_in_repo = st.text_input("Path of streamlit entrypoint in Repo:")
+
+    if re.match(r"[a-zA-z-]*", app_name) is None:
+        st.warning("The application name must only be compoased of letter and hyphens -")
 
     if st.button("Register"):
         if app_name and repo_url and repo_branch and path_in_repo:

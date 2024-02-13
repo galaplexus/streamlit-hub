@@ -7,7 +7,7 @@ from streamlit_hub.models.App import LocalApp, RepoApp
 def show_status(manager: Manager):
     col1, col2, col3 = st.columns([1, 1, 1])
     col1.write("**App Name**")
-    col2.write("**App Details**")
+    col2.write("**App**")
     col3.write("**Actions**")
     for app in manager.registered_apps:
         st.markdown("""---""")
@@ -16,7 +16,7 @@ def show_status(manager: Manager):
             col2,
             col3,
         ) = st.columns([0.2, 1, 1])
-        col1.write(f"**{app.name}**")
+        col1.write(f"[{app.name}](/{app.name})")
         if type(app) is LocalApp:
             col2.write(app.path)
         if type(app) is RepoApp:

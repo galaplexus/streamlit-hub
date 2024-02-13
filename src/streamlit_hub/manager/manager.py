@@ -4,11 +4,14 @@ import logging
 import threading
 import time
 from typing import List, Optional
+from streamlit_hub.access.nginx_access import NginxAccess
 from streamlit_hub.access.registered_apps_access import AppAccess
 from streamlit_hub.access.repo_access import RepoAccess
 from streamlit_hub.models.App import App, LocalApp, RepoApp
 
 from streamlit_hub.models.RunningProcess import LocalProcess
+
+import socket
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +19,7 @@ logger = logging.getLogger(__name__)
 class Manager:
     registered_apps: List[App] = []
     app_access = AppAccess()
+    nginx_access = NginxAccess()
     occupied_ports: set[int] = set()
 
     def __init__(self) -> None:
@@ -23,13 +27,14 @@ class Manager:
         for app in self.registered_apps:
             if app.run_by_default:
                 try:
-                    self.start_app(app)
-                except:
-                    logger.error(f"couldnt start {app.name} at startup")
+                    self.start_app(app, restart_nginx_server=False)
+                except Exception as e:
+                    logger.error(f"couldnt start {app.name} at startup. Error {e}")
         check_thread = threading.Thread(target=self._clean_closed_processes, args=(), daemon=True)
         check_thread.start()
+        self.nginx_access.restart_nginx()
 
-    def start_app(self, app: App):
+    def start_app(self, app: App, restart_nginx_server=True):
         logger.info(f"Starting {app}")
         port = int(app.desired_port) if app.desired_port is not None else self._find_next_port()
         if type(app) is LocalApp:
@@ -42,10 +47,23 @@ class Manager:
             logger.error("We can't process other type of app than local apps at the moment")
             return None
         process = subprocess.Popen(
-            ["python", "-m", "streamlit", "run", path, "--server.port", str(port)], start_new_session=True
+            [
+                "python",
+                "-m",
+                "streamlit",
+                "run",
+                path,
+                "--server.port",
+                str(port),
+                "--server.baseUrlPath",
+                str(app.name),
+            ],
+            start_new_session=True,
         )
         self.occupied_ports.add(port)
         app.running_process = LocalProcess("", port, process)
+        if restart_nginx_server:
+            self.nginx_access.restart_nginx()
         return process
 
     def register_app(self, app: App) -> Optional[str]:
@@ -56,6 +74,9 @@ class Manager:
             app.local_path = os.path.join(access.repo_path, app.streamlit_entry_point_in_repo)
         self.registered_apps.append(app)
         self.app_access.persist_list(self.registered_apps)
+        port = int(app.desired_port) if app.desired_port is not None else self._find_next_port()
+        self.nginx_access.add_app(app.name, port)
+        app.desired_port = port
 
     def toggle_run_default_app(self, app: App, run_by_default: bool) -> Optional[str]:
         app.run_by_default = run_by_default
@@ -103,6 +124,11 @@ class Manager:
             if potential in self.occupied_ports:
                 continue
             if any(map(lambda x: x.desired_port == potential, self.registered_apps)):
+                continue
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex(("127.0.0.1", 80))
+            sock.close()
+            if result == 0:
                 continue
             return potential
         raise Exception("No new port found")
