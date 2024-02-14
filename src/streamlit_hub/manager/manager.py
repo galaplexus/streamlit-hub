@@ -58,6 +58,8 @@ class Manager:
                 str(port),
                 "--server.baseUrlPath",
                 str(app.name),
+                "--server.enableCORS",
+                "false",
             ],
         )
         self.occupied_ports.add(port)
