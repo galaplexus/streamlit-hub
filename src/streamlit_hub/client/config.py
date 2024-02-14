@@ -11,7 +11,7 @@ def show_config(manager: Manager):
 
     nginx_path = st.text_input("Nginx config path:", manager.nginx_access.get_config_path())
     if nginx_path:
-        manager.nginx_access.set_config_directory(nginx_path)
+        manager.nginx_access.set_config_path(nginx_path)
 
     serving_port = st.number_input("Serving Port:", manager.nginx_access.get_serving_port(), step=1)
     if serving_port:

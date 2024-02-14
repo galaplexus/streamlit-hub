@@ -1,3 +1,4 @@
+import logging
 import re
 import os
 import configparser
@@ -5,7 +6,9 @@ import platform
 import subprocess
 from typing import Optional
 import nginx
-import streamlit
+
+
+logger = logging.getLogger(__name__)
 
 
 class NginxAccess:
@@ -22,7 +25,7 @@ class NginxAccess:
     persisited_base_path = os.path.join(os.path.expanduser("~"), ".streamlit-hub")
     persisited_nginx_config_path = os.path.join(persisited_base_path, "nginx.ini")
     config: configparser.ConfigParser
-    nginx_conf: Optional[nginx.Conf]
+    nginx_conf: Optional[nginx.Conf] = None
     path_key = "config_path"
     port_key = "serving_port"
     enabled_key = "enabled"
@@ -37,19 +40,23 @@ class NginxAccess:
                 config.write(file)
         self.config = configparser.ConfigParser()
         self.config.read(self.persisited_nginx_config_path)
-        self._parse_conf()
+        self.nginx_conf = self._parse_conf()
 
     def restart_nginx(self):
+        if not self.get_enabled_flag():
+            return
         if platform.system() == "Windows":
             subprocess.run(["nginx", "-s", "reload"], check=True)
         else:
             subprocess.run(["sudo", "systemctl", "reload", "nginx"], check=True)
 
     def add_app(self, name: str, port: int):
-        if re.search(r"\W", name):
+        if re.search(r"\s", name):
             raise Exception("The application name cannot contain white spaces")
 
-        if self.contains_app(name) or self.contains_port(port):
+        if self.contains_app(name):
+            return
+        if self.contains_port(port):
             raise Exception("The name of the application or the port was already in use.")
         new_location = nginx.Location(f"/{name}")
         new_location.add(nginx.Key("proxy_pass", f"http://localhost:{port}/{name}"))
@@ -93,15 +100,17 @@ class NginxAccess:
     def _parse_conf(self) -> Optional[nginx.Conf]:
         config_path = self.get_config_path()
         if not config_path:
+            logger.warn("No config path found for the nginx conf file")
             return None
         if os.path.exists(config_path):
             self.nginx_conf = nginx.loadf(config_path)
         else:
             self.nginx_conf = nginx.Conf()
             base_server = nginx.Server()
-            base_server.add(nginx.Key("listen", "80"))
+            base_server.add(nginx.Key("listen", str(self.get_serving_port())))
             base_server.add(nginx.Key("server_name", "localhost"))
             self.nginx_conf.add(base_server)
+            self.add_app("hub", 8501)
         return self.nginx_conf
 
     def _write_conf_to_file(self):
@@ -142,15 +151,3 @@ class NginxAccess:
         self.config["DEFAULT"][self.enabled_key] = str(not f)
         with open(self.persisited_nginx_config_path, "w") as f:
             self.config.write(f)
-
-
-if __name__ == "__main__":
-    a = NginxAccess()
-    streamlit.write(list(a.config.items()))
-    streamlit.write(a.get_config_path())
-    conf = a._parse_conf()
-    # streamlit.write(a.nginx_conf.children[2].children)
-    streamlit.write(a.nginx_conf.children)
-    streamlit.write(conf.as_dict)
-    a.add_app("a", 50)
-    streamlit.write(conf.as_dict)

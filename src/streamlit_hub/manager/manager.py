@@ -19,10 +19,11 @@ logger = logging.getLogger(__name__)
 class Manager:
     registered_apps: List[App] = []
     app_access = AppAccess()
-    nginx_access = NginxAccess()
+    nginx_access: NginxAccess
     occupied_ports: set[int] = set()
 
     def __init__(self) -> None:
+        self.nginx_access = NginxAccess()
         self.registered_apps = self.app_access.get_list()
         for app in self.registered_apps:
             if app.run_by_default:
@@ -58,10 +59,10 @@ class Manager:
                 "--server.baseUrlPath",
                 str(app.name),
             ],
-            start_new_session=True,
         )
         self.occupied_ports.add(port)
         app.running_process = LocalProcess("", port, process)
+        self.nginx_access.add_app(app.name, port)
         if restart_nginx_server:
             self.nginx_access.restart_nginx()
         return process
@@ -126,7 +127,7 @@ class Manager:
             if any(map(lambda x: x.desired_port == potential, self.registered_apps)):
                 continue
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(("127.0.0.1", 80))
+            result = sock.connect_ex(("127.0.0.1", potential))
             sock.close()
             if result == 0:
                 continue
