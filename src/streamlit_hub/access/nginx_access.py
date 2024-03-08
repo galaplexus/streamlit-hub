@@ -137,7 +137,7 @@ class NginxAccess:
             self.config.write(f)
 
     def get_enabled_flag(self) -> bool:
-        return bool(self.config["DEFAULT"][self.enabled_key]) if self.enabled_key in self.config["DEFAULT"] else False
+        return self.config["DEFAULT"][self.enabled_key].lower() == "true" if self.enabled_key in self.config["DEFAULT"] else False
 
     def set_enabled_flag(self, enabled: bool):
         if self.get_enabled_flag() == enabled:
