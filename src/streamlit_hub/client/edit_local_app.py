@@ -5,7 +5,7 @@ from streamlit_hub.models.App import LocalApp
 
 
 def edit_local_app(manager: Manager):
-    st.header("Edit you App")
+    st.header("Edit your App")
     local_apps: List[LocalApp] = list(filter(lambda x: type(x) is LocalApp, manager.app_access.get_list()))
     if not local_apps:
         st.warning("There are no local app to edit. Please register one in Register tab")

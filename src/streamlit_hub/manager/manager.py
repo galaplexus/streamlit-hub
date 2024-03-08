@@ -88,6 +88,8 @@ class Manager:
     def unregister_app(self, app: App) -> Optional[str]:
         self.registered_apps = list(filter(lambda matching_app: app.name != matching_app.name, self.registered_apps))
         self.app_access.persist_list(self.registered_apps)
+        app.cleanup()
+        self.nginx_access.remove_app(app.name)
 
     def stop_app(self, app: App) -> subprocess.Popen:
         logger.info(f"Stopping {app.name}")

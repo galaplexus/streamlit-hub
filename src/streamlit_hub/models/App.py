@@ -18,7 +18,7 @@ class App:
 @dataclasses.dataclass
 class LocalApp(App):
     path: str = ""
-    app_managed = False
+    app_managed: bool = False
 
     def cleanup(self):
         if self.app_managed:

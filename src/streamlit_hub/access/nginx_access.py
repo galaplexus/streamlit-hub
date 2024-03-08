@@ -73,6 +73,20 @@ class NginxAccess:
             child.add(new_location)
         self._write_conf_to_file()
 
+    def remove_app(self, app_name: str) -> bool:
+        if not self.get_enabled_flag():
+            return
+        for k in self.nginx_conf.children:
+            for c in k.children:
+                if type(c) is not nginx.Location:
+                    continue
+                c: nginx.Location
+                if c.value == "/" + app_name:
+                    k.remove(c)
+                    self._write_conf_to_file()
+                    return True
+        return False
+
     def contains_app(self, name) -> bool:
         for k in self.nginx_conf.children:
             for c in k.children:
