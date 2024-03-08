@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from typing import List
 from streamlit_hub.models.App import App, LocalApp, RepoApp
 
@@ -60,3 +61,19 @@ class AppAccess:
             encoded.append(new)
         with open(self.persisited_registered_apps_path, "w") as file:
             json.dump(encoded, file)
+
+    def create_new_local_app_project(self, app_name: str) -> str:
+        if re.search(r"\s", app_name):
+            raise Exception("The application name cannot contain white spaces")
+        filename_path = os.path.join(self.persisited_base_path, "local_apps", app_name, "main.py")
+        if os.path.exists(filename_path):
+            with open(filename_path) as f:
+                if f.read():
+                    raise Exception(
+                        f"Project {app_name} seems to exist already."
+                        + " Please chose another name or delete existing project"
+                    )
+        if not os.path.exists(os.path.dirname(filename_path)):
+            os.makedirs(os.path.dirname(filename_path))
+        open(filename_path, "a").close()
+        return filename_path

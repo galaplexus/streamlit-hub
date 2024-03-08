@@ -1,6 +1,6 @@
 import streamlit as st
 import importlib
-from streamlit_hub.client import config, register, status
+from streamlit_hub.client import config, register, status, edit_local_app
 import streamlit_hub.manager.manager
 from streamlit_hub.manager.manager import Manager
 
@@ -26,18 +26,19 @@ def get_manager():
 def run():
     manager = get_manager()
     st.title("App Manager Control Panel")
-    page = st.sidebar.radio("Select Page", ["Home", "Register App", "Config"])
+    page = st.sidebar.radio("Select Page", ["Home", "Register App", "Edit your App", "Config"])
     if page == "Home":
         status.show_status(manager)
     elif page == "Register App":
         register.show_register(manager)
+    elif page == "Edit your App":
+        edit_local_app.edit_local_app(manager)
     else:
         config.show_config(manager)
 
     st.markdown(
         """
-    **For more information:**
-    - [Streamlit Documentation](https://docs.streamlit.io/)
+    **Documentation:**
     - [GitHub Repository](https://github.com/galaplexus/streamlit-hub)
     """
     )

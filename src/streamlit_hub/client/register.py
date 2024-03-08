@@ -8,14 +8,27 @@ def local_source(manager: Manager, app_name: str, run_by_default: bool):
     app_path = st.text_input("App Path:")
 
     if st.button("Register"):
-        if app_name and app_path:
-            ret = manager.register_app(LocalApp(name=app_name, run_by_default=run_by_default, path=app_path))
-            if ret:
-                st.error(ret)
-            else:
-                st.success(f"App {app_name} registered successfully!")
+        _register_new_local_project(manager, app_name, run_by_default, app_path)
+
+
+def new_local_source(manager: Manager, app_name: str, run_by_default: bool):
+    if st.button("Register"):
+        app_path = manager.app_access.create_new_local_app_project(app_name)
+        if _register_new_local_project(manager, app_name, run_by_default, app_path):
+            st.success('You can start editing your code in the "Edit your App" tab')
+
+
+def _register_new_local_project(manager: Manager, app_name: str, run_by_default: bool, app_path: str) -> bool:
+    if app_name and app_path:
+        ret = manager.register_app(LocalApp(name=app_name, run_by_default=run_by_default, path=app_path))
+        if ret:
+            st.error(ret)
         else:
-            st.error("Please provide both App Name and App Path.")
+            st.success(f"App {app_name} registered successfully!")
+            return True
+    else:
+        st.error("Please provide both App Name and App Path.")
+    return False
 
 
 def repo_source(manager: Manager, app_name: str, run_by_default: bool):
@@ -49,11 +62,13 @@ def show_register(manager: Manager):
     st.header("Register New App")
 
     app_name = st.text_input("App Name:")
-    run_by_default = st.checkbox("Run Application at startup")
+    run_by_default = st.checkbox("Run application at startup")
 
-    source = st.radio("Source of application", ["Local Directory", "Git Repo"])
+    source = st.radio("Source of application", ["New Local Application", "Existing Local Application", "Git Repo"])
 
-    if source == "Local Directory":
+    if source == "Existing Local Application":
         local_source(manager, app_name, run_by_default)
+    elif source == "New Local Application":
+        new_local_source(manager, app_name, run_by_default)
     else:
         repo_source(manager, app_name, run_by_default)
