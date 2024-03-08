@@ -57,7 +57,7 @@ class NginxAccess:
         if self.contains_app(name):
             return
         if self.contains_port(port):
-            raise Exception("The name of the application or the port was already in use.")
+            raise Exception(f"The port {port} is already in use in the nginx file.")
         new_location = nginx.Location(f"/{name}")
         new_location.add(nginx.Key("proxy_pass", f"http://localhost:{port}/{name}"))
         new_location.add(nginx.Key("proxy_set_header", "Host $host"))
@@ -137,7 +137,11 @@ class NginxAccess:
             self.config.write(f)
 
     def get_enabled_flag(self) -> bool:
-        return self.config["DEFAULT"][self.enabled_key].lower() == "true" if self.enabled_key in self.config["DEFAULT"] else False
+        return (
+            self.config["DEFAULT"][self.enabled_key].lower() == "true"
+            if self.enabled_key in self.config["DEFAULT"]
+            else False
+        )
 
     def set_enabled_flag(self, enabled: bool):
         if self.get_enabled_flag() == enabled:

@@ -14,13 +14,17 @@ def local_source(manager: Manager, app_name: str, run_by_default: bool):
 def new_local_source(manager: Manager, app_name: str, run_by_default: bool):
     if st.button("Register"):
         app_path = manager.app_access.create_new_local_app_project(app_name)
-        if _register_new_local_project(manager, app_name, run_by_default, app_path):
+        if _register_new_local_project(manager, app_name, run_by_default, app_path, True):
             st.success('You can start editing your code in the "Edit your App" tab')
 
 
-def _register_new_local_project(manager: Manager, app_name: str, run_by_default: bool, app_path: str) -> bool:
+def _register_new_local_project(
+    manager: Manager, app_name: str, run_by_default: bool, app_path: str, app_managed=False
+) -> bool:
     if app_name and app_path:
-        ret = manager.register_app(LocalApp(name=app_name, run_by_default=run_by_default, path=app_path))
+        ret = manager.register_app(
+            LocalApp(name=app_name, run_by_default=run_by_default, path=app_path, app_managed=app_managed)
+        )
         if ret:
             st.error(ret)
         else:

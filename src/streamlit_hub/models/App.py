@@ -1,6 +1,6 @@
 import dataclasses
+import os
 from typing import Optional
-
 from streamlit_hub.models.RunningProcess import RunningProcess
 
 
@@ -11,10 +11,18 @@ class App:
     running_process: Optional[RunningProcess] = None
     desired_port: Optional[str] = None
 
+    def cleanup(self):
+        pass
+
 
 @dataclasses.dataclass
 class LocalApp(App):
     path: str = ""
+    app_managed = False
+
+    def cleanup(self):
+        if self.app_managed:
+            os.remove(self.path)
 
 
 @dataclasses.dataclass

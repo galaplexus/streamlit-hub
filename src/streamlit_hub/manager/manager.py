@@ -76,10 +76,10 @@ class Manager:
             access = RepoAccess(app)
             app.local_path = os.path.join(access.repo_path, app.streamlit_entry_point_in_repo)
         self.registered_apps.append(app)
-        self.app_access.persist_list(self.registered_apps)
         port = int(app.desired_port) if app.desired_port is not None else self._find_next_port()
         self.nginx_access.add_app(app.name, port)
         app.desired_port = port
+        self.app_access.persist_list(self.registered_apps)
 
     def toggle_run_default_app(self, app: App, run_by_default: bool) -> Optional[str]:
         app.run_by_default = run_by_default
@@ -127,6 +127,8 @@ class Manager:
             if potential in self.occupied_ports:
                 continue
             if any(map(lambda x: x.desired_port == potential, self.registered_apps)):
+                continue
+            if self.nginx_access.contains_port(potential):
                 continue
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex(("127.0.0.1", potential))
