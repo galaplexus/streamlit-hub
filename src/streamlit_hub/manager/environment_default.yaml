@@ -15,7 +15,7 @@ dependencies:
       - bcrypt
       - build
       - chromadb
-      - cvat-sdk
+      - cvat-sdk==2.45.0
       - duckdb
       - fastapi
       - gitpython
@@ -30,12 +30,14 @@ dependencies:
       - polars
       - posthog
       - psycopg2
+      - pybarn
       - pydeck
       - pygwalker
       - pymongo
       - pycryptodome
       - python-dotenv
       - rich
+      - scikit-learn
       - scipy
       - segment-analytics-python
       - sqlglot
