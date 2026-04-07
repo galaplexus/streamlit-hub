@@ -47,8 +47,14 @@ class Manager:
         else:
             logger.error("We can't process other type of app than local apps at the moment")
             return None
+        if not self._conda_env_exists(app):
+            self._conda_env_create(app)
         process = subprocess.Popen(
             [
+                "conda",
+                "run",
+                "-n",
+                app.name,
                 "python",
                 "-m",
                 "streamlit",
@@ -75,11 +81,48 @@ class Manager:
         if type(app) is RepoApp:
             access = RepoAccess(app)
             app.local_path = os.path.join(access.repo_path, app.streamlit_entry_point_in_repo)
+        self._conda_env_create(app)
         self.registered_apps.append(app)
         port = int(app.desired_port) if app.desired_port is not None else self._find_next_port()
         self.nginx_access.add_app(app.name, port)
         app.desired_port = port
         self.app_access.persist_list(self.registered_apps)
+
+    def _conda_env_create(self, app: App):
+        self._conda_env_delete(app)
+
+        # Determine app directory
+        if type(app) is LocalApp:
+            app_dir = os.path.dirname(app.path)
+        elif type(app) is RepoApp:
+            app_dir = os.path.dirname(app.local_path)
+        else:
+            app_dir = ""
+
+        # Prefer environment.yml in the app directory, fall back to bundled default
+        env_file = os.path.join(app_dir, "environment.yml")
+        if not os.path.isfile(env_file):
+            logger.info(f"No environment.yml found for '{app.name}'. Using default environment file.")
+            env_file = os.path.join(os.path.dirname(__file__), "environment_default.yaml")
+
+        # Create the conda environment
+        logger.info(f"Creating conda env '{app.name}' from '{env_file}'")
+        subprocess.run(["conda", "env", "create", "--name", app.name, "--file", env_file], check=True)
+
+    @staticmethod
+    def _conda_env_exists(app: App) -> bool:
+        result = subprocess.run(["conda", "env", "list"], capture_output=True, text=True)
+        existing_envs = [
+            line.split()[0]
+            for line in result.stdout.splitlines()
+            if line and not line.startswith("#")
+        ]
+        return app.name in existing_envs
+
+    def _conda_env_delete(self, app: App):
+        if self._conda_env_exists(app):
+            logger.info(f"Conda env '{app.name}' already exists. Deleting it.")
+            subprocess.run(["conda", "env", "remove", "--name", app.name, "--yes"], check=True)
 
     def toggle_run_default_app(self, app: App, run_by_default: bool) -> Optional[str]:
         app.run_by_default = run_by_default
@@ -90,6 +133,7 @@ class Manager:
         self.app_access.persist_list(self.registered_apps)
         app.cleanup()
         self.nginx_access.remove_app(app.name)
+        self._conda_env_delete(app)
 
     def stop_app(self, app: App) -> subprocess.Popen:
         logger.info(f"Stopping {app.name}")

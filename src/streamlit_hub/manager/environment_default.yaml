@@ -1,0 +1,53 @@
+name: streamlit_app
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9.18
+  - pip
+  - pip:
+      - albumentations
+      - altair
+      - apscheduler
+      - astor
+      - backoff
+      - bcrypt
+      - build
+      - chromadb
+      - cvat-sdk
+      - duckdb
+      - fastapi
+      - gitpython
+      - jira
+      - kubernetes
+      - minio
+      - onnxruntime
+      - openai
+      - opencv-python
+      - opencv-python-headless
+      - pillow
+      - polars
+      - posthog
+      - psycopg2
+      - pydeck
+      - pygwalker
+      - pymongo
+      - pycryptodome
+      - python-dotenv
+      - rich
+      - scipy
+      - segment-analytics-python
+      - sqlglot
+      - streamlit
+      - streamlit-cropper
+      - streamlit-hub
+      - streamlit-plotly-events
+      - tinydb
+      - torch
+      - torchvision
+      - typer
+      - ultralytics
+      - uvicorn
+      - validators
+      - wasmtime
+
